@@ -1,32 +1,30 @@
 import DB.DBService;
-import org.xml.sax.SAXException;
+import XML.XMLCreate;
+import XML.XMLParser;
+import XML.XMLRefactor;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.TransformerException;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 
 /**
- * Created by DNS on 19.04.2017.
+ * sorry for the bad code, but I'll be better
  */
 public class main {
-    public static void main(String[] args) throws IOException, TransformerException, ParserConfigurationException, SAXException {
+    public static void main(String[] args) {
         DBService dbService = new DBService();
-        XMLCreate xmlCreate = new XMLCreate();
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Insert N");
-        int n = (int) Integer.parseInt(reader.readLine());
-        dbService.add(n);
+        int n = 0;
         try {
-            xmlCreate.createXML(dbService);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-        } catch (TransformerException e) {
+            n = Integer.parseInt(reader.readLine());
+        } catch (IOException e) {
             e.printStackTrace();
         }
-        xmlCreate.refactor();
-        System.out.println(xmlCreate.summ());
+        dbService.add(n);
+        XMLCreate.createXML(dbService);
+        XMLRefactor.refactorXSLT();
+        System.out.println(XMLParser.sumFieldValues());
     }
 }

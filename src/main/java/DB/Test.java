@@ -6,33 +6,29 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
 
-/**
- * Created by DNS on 19.04.2017.
- */
+
 @Entity
 @Table(name = "test")
 public class Test implements Serializable {
     @Id
-    @Column(name = "test")
-    private int test;
+    @Column(name = "column1")
+    private int testValue;
 
-    public Test(int test) {
-        this.test = test;
-    }
     public Test() {
-        this.test = test;
+    }
+    public Test(int testValue) {
+        this.testValue = testValue;
     }
 
-    public int getTest() {
-        return test;
+    public int getTestValue() {
+        return testValue;
     }
-
-    public void setTest(int test) {
-        this.test = test;
+    public void setTestValue(int testValue) {
+        this.testValue = testValue;
     }
 
     @Override
     public String toString() {
-        return test+"";
+        return testValue+"";
     }
 }

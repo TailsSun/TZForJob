@@ -8,14 +8,15 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Properties;
 
-/**
- * Created by DNS on 19.04.2017.
- */
+
 public class DBService {
-    private static final String hibernate_show_sql = "false";
-    private static final String hibernate_hbm2ddl_auto = "create";
 
     private final SessionFactory sessionFactory;
 
@@ -24,7 +25,6 @@ public class DBService {
         sessionFactory = createSessionFactory(configuration);
     }
 
-    // стандартная для фабрики сессий
     private static SessionFactory createSessionFactory(Configuration configuration) {
         StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder();
         builder.applySettings(configuration.getProperties());
@@ -32,31 +32,37 @@ public class DBService {
         return configuration.buildSessionFactory(serviceRegistry);
     }
 
-    // конфиг к H2
     private Configuration getH2Configuration() {
+        Properties props = new Properties();
+        try {
+            props.load(new FileInputStream(new File("src/main/resources/property.cfg")));
+        } catch (IOException e) {
+            System.out.println("Configuration file 'property.cfg' not found");
+        }
+
         Configuration configuration = new Configuration();
         configuration.addAnnotatedClass(Test.class);
-
-        configuration.setProperty("hibernate.dialect", "org.hibernate.dialect.H2Dialect");
-        configuration.setProperty("hibernate.connection.driver_class", "org.h2.Driver");
-        configuration.setProperty("hibernate.connection.url", "jdbc:h2:./h2db");
-        configuration.setProperty("hibernate.connection.username", "tails");
-        configuration.setProperty("hibernate.connection.password", "tails");
-        configuration.setProperty("hibernate.show_sql", hibernate_show_sql);
-        configuration.setProperty("hibernate.hbm2ddl.auto", hibernate_hbm2ddl_auto);
+        configuration.setProperty("hibernate.dialect", props.getProperty("hibernate_dialect"));
+        configuration.setProperty("hibernate.connection.driver_class", props.getProperty("hibernate_connection_driver_class"));
+        configuration.setProperty("hibernate.connection.url", props.getProperty("hibernate_connection_url"));
+        configuration.setProperty("hibernate.connection.username", props.getProperty("hibernate_connection_username"));
+        configuration.setProperty("hibernate.connection.password", props.getProperty("hibernate_connection_password"));
+        configuration.setProperty("hibernate.show_sql", "false");
+        configuration.setProperty("hibernate.hbm2ddl.auto", "create");
         return configuration;
     }
 
-    public ArrayList<Integer> get() {
+    public ArrayList<Test> getAllElement() {
         try {
             Session session = sessionFactory.openSession();
             DAO dao = new DAO(session);
-            ArrayList tests = dao.getAll();
+            ArrayList<Test> listTestValues = dao.getAll();
             session.close();
-            sessionFactory.close();
-            return tests;
+            return listTestValues;
         } catch (HibernateException e) {
             e.printStackTrace();
+        } finally {
+            sessionFactory.close();
         }
         return null;
     }
@@ -66,10 +72,9 @@ public class DBService {
             Session session = sessionFactory.openSession();
             Transaction transaction = session.beginTransaction();
             DAO dao = new DAO(session);
-            dao.addN(n);
+            dao.addNForBD(n);
             transaction.commit();
             session.close();
-
         } catch (HibernateException e) {
             e.printStackTrace();
         }
